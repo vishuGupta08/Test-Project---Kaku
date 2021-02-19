@@ -16,7 +16,7 @@ router.get('/', catchAsync(async (req, res, next) => {
 
 }))
 
-router.post('/', validateStateData, isLoggedIn, catchAsync(async (req, res, next) => {
+router.post('/', validateStateData, catchAsync(async (req, res, next) => {
     const state = new State(req.body)
     await state.save();
     res.send('State Added')

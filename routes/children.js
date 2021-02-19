@@ -34,14 +34,23 @@ router.post('/', catchAsync(async (req, res, next) => {
     const stateFound = await State.find({ "name": state })
     const { district } = req.body
     const districtFound = await District.find({ "name": district })
-    console.log(districtFound)
     const child = new Child(req.body)
     child.state = stateFound[0]._id
     child.district = districtFound[0]._id
-    console.log(child)
+    let x = []
+    x = await Child.find({ "district": districtFound[0]._id }).select('name');
+    let y = []
+    for (let i = 0; i < x.length; i++)
+        y[i] = x[i].name
+    for (let j = 0; j < y.length; j++) {
+        if (child.name == y[j]) {
+            res.send('Child with this name already exist in this District')
+        }
+    }
+
     await child.save();
     res.send('Child Added')
-    console.log(child)
+
 
 }))
 
