@@ -21,12 +21,13 @@ const childSchema = new mongoose.Schema({
         required: true
     },
     state: {
-        type: String,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'State'
+        // 
     },
     district: {
-        type: String,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'District'
     },
     dob: {
         type: String,

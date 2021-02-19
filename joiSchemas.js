@@ -12,8 +12,7 @@ module.exports.childSchema = Joi.object({
     fatherName: Joi.string()
         .required(),
 
-    state: Joi.string()
-        .required(),
+
 
     district: Joi.string()
         .required(),
@@ -22,9 +21,9 @@ module.exports.childSchema = Joi.object({
         .required(),
 })
 
-module.exports.surveyorSchema = Joi.object({
-    email: Joi.string()
-        .required(),
-    password: Joi.string()
+module.exports.stateSchema = Joi.object({
+    name: Joi.string()
         .required()
+
+
 })

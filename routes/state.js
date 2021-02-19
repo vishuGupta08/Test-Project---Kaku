@@ -1,18 +1,26 @@
 const express = require('express')
 const router = express.Router();
 const { isLoggedIn } = require('../middlewares')
+const State = require('../models/state')
+const AppError = require('../utils/AppError')
+const catchAsync = require('../utils/catchAsync')
+const { validateStateData } = require('../middlewares')
 
+router.get('/', catchAsync(async (req, res, next) => {
+    const states = await State.find({})
+    if (!states) {
+        return next(new AppError('Data does not exist', 500))
+    } else {
+        res.send(states)
+    }
 
-router.get('/', (req, res) => {
-    console.log(req.body)
-    res.send('List of states')
-})
+}))
 
+router.post('/', validateStateData, isLoggedIn, catchAsync(async (req, res, next) => {
+    const state = new State(req.body)
+    await state.save();
+    res.send('State Added')
+}))
 
-router.post('/', isLoggedIn, (req, res) => {
-    const { kl } = req.body
-    res.send(`State added - ${kl}`)
-
-})
 
 module.exports = router
