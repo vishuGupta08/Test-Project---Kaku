@@ -33,6 +33,10 @@ const childSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    image: {
+        url: String,
+        filename: String
+    }
 })
 
 const Child = mongoose.model('Child', childSchema)
