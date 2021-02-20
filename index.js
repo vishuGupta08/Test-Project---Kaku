@@ -14,6 +14,7 @@ const session = require('express-session')
 const children = require('./routes/children')
 const state = require('./routes/state')
 const district = require('./routes/district')
+const auth = require('./routes/auth')
 
 mongoose.connect('mongodb://localhost:27017/childSurvey', { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
@@ -40,24 +41,9 @@ passport.deserializeUser(Surveyor.deserializeUser())
 app.use('/children', children)
 app.use('/state', state)
 app.use('/district', district)
+app.use('/auth', auth)
 
 
-app.post('/register', async (req, res) => {
-    const { email, username, password } = req.body;
-    const s = new Surveyor({ email, username })
-    const newSurveyor = await Surveyor.register(s, password)
-    res.send(newSurveyor)
-})
-
-
-app.post('/login', passport.authenticate('local'), (req, res, next) => {
-    res.send('You Are Logged In')
-})
-
-app.get('/logout', isLoggedIn, (req, res) => {
-    req.logout();
-    res.send('You are logged Out Successfully!')
-})
 
 app.all('*', (req, res, next) => {
     next(new AppError('Page does not exist Sir', 404))
@@ -65,14 +51,15 @@ app.all('*', (req, res, next) => {
 
 app.use((err, req, res, next) => {
     const { status = 500, message = 'Something went wrong' } = err;
-    res.send(message).status(status)
+    res.status(status)
+    res.send({ error: message })
 
 
 })
 
 
 app.listen(3000, () => {
-    console.log('Connected on Port 3000')
+    console.log('Server listening on Port 3000')
 })
 
 

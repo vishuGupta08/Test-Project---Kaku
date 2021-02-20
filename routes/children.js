@@ -21,7 +21,7 @@ router.get('/:id', isLoggedIn, catchAsync(async (req, res, next) => {
 router.get('/', catchAsync(async (req, res, next) => {
     const children = await Child.find({})
     if (!children) {
-        return next(new AppError('Data does not exist', 500))
+        return next(new AppError('Data does not exist', 204))
     } else {
         res.send(children)
     }
@@ -37,22 +37,38 @@ router.post('/', catchAsync(async (req, res, next) => {
     const child = new Child(req.body)
     child.state = stateFound[0]._id
     child.district = districtFound[0]._id
-    let x = []
-    x = await Child.find({ "district": districtFound[0]._id }).select('name');
-    let y = []
-    for (let i = 0; i < x.length; i++)
-        y[i] = x[i].name
-    for (let j = 0; j < y.length; j++) {
-        if (child.name == y[j]) {
-            res.send('Child with this name already exist in this District')
-        }
+
+    let exist = await Child.exists({ name: child.name, district: districtFound[0]._id })
+    if (exist) {
+        throw new AppError('Child with this name already exist in this District', 400)
     }
+    await child.save();
+    res.send({
+        msg: 'Child Added'
+    })
+}))
+
+router.patch('/:id', catchAsync(async (req, res, next) => {
+
+    const { state } = req.body
+    const stateFound = await State.find({ "name": state })
+    const { district } = req.body
+    const districtFound = await District.find({ "name": district })
+    req.body.state = stateFound[0]._id
+    req.body.district = districtFound[0]._id
+
+    child = await Child.findByIdAndUpdate(req.params.id, { ...req.body })
 
     await child.save();
-    res.send('Child Added')
-
-
+    res.send('Child Updated Successfully')
 }))
+
+
+router.delete('/:id', catchAsync(async (req, res, next) => {
+    const child = await Child.findByIdAndDelete(req.params.id);
+    res.send(' Deleted Successfully')
+}))
+
 
 
 module.exports = router
