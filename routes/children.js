@@ -29,39 +29,67 @@ router.get('/:id', isLoggedIn, catchAsync(async (req, res, next) => {
 
 }))
 
-router.get('/', catchAsync(async (req, res, next) => {
-    const children = await Child.find({})
+router.get('/', isLoggedIn, catchAsync(async (req, res, next) => {
+    const children = await Child.find({}).populate({
+        path: "district",
+        select: "name",
+    }).populate({
+        path: "state",
+        select: "name",
+    })
     if (!children) {
         return next(new AppError('Data does not exist', 204))
+
     } else {
         res.send(children)
     }
-
 }))
 
 router.post('/', upload.single('image'), catchAsync(async (req, res, next) => {
-    req.body = JSON.parse(req.body.request);
-    const { state } = req.body
-    const stateFound = await State.find({ "name": state })
-    const { district } = req.body
-    const districtFound = await District.find({ "name": district })
+    if (!req.body.request) {
+        const { state } = req.body
+        const stateFound = await State.find({ "name": state })
+        const { district } = req.body
+        const districtFound = await District.find({ "name": district })
 
-    const child = new Child(req.body)
-
-    child.image.url = req.file.path
-    child.image.filename = req.file.filename
-    child.state = stateFound[0]._id
-    child.district = districtFound[0]._id
+        const child = new Child(req.body)
+        child.state = stateFound[0]._id
+        child.district = districtFound[0]._id
 
 
-    let exist = await Child.exists({ name: child.name, district: districtFound[0]._id })
-    if (exist) {
-        throw new AppError('Child with this name already exist in this District', 400)
+        let exist = await Child.exists({ name: child.name, district: districtFound[0]._id })
+        if (exist) {
+            throw new AppError('Child with this name already exist in this District', 400)
+        }
+        await child.save();
+        res.send({
+            msg: 'Child Added without Image'
+        })
+    } else {
+        req.body = JSON.parse(req.body.request);
+        const { state } = req.body
+        const stateFound = await State.find({ "name": state })
+        const { district } = req.body
+        const districtFound = await District.find({ "name": district })
+
+        const child = new Child(req.body)
+
+        child.image.url = req.file.path
+        child.image.filename = req.file.filename
+        child.state = stateFound[0]._id
+        child.district = districtFound[0]._id
+
+
+        let exist = await Child.exists({ name: child.name, district: districtFound[0]._id })
+        if (exist) {
+            throw new AppError('Child with this name already exist in this District', 400)
+        }
+        await child.save();
+        res.send({
+            msg: 'Child Added with image'
+        })
     }
-    await child.save();
-    res.send({
-        msg: 'Child Added'
-    })
+
 }))
 
 router.patch('/:id', catchAsync(async (req, res, next) => {
@@ -71,9 +99,7 @@ router.patch('/:id', catchAsync(async (req, res, next) => {
     const districtFound = await District.find({ "name": district })
     req.body.state = stateFound[0]._id
     req.body.district = districtFound[0]._id
-
     child = await Child.findByIdAndUpdate(req.params.id, { ...req.body })
-
     await child.save();
     res.send('Child Updated Successfully')
 }))

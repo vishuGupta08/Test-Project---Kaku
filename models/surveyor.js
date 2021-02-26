@@ -6,6 +6,18 @@ const surveyorSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
+    },
+    name: {
+        type: String,
+        required: true,
+    },
+    designation: {
+        type: String,
+        required: true,
+    },
+    organization: {
+        type: String,
+        required: true,
     }
 
 })

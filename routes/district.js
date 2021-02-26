@@ -7,7 +7,10 @@ const AppError = require('../utils/AppError')
 const catchAsync = require('../utils/catchAsync')
 
 router.get('/', catchAsync(async (req, res, next) => {
-    const districts = await District.find({})
+    const districts = await District.find({}).populate({
+        path: "state",
+        select: "name"
+    })
     if (!districts) {
         return next(new AppError('Data does not exist', 500))
     } else {
