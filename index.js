@@ -22,6 +22,7 @@ const district = require('./routes/district')
 const auth = require('./routes/auth')
 const cors = require('cors')
 
+
 mongoose.connect('mongodb://localhost:27017/childSurvey', { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
         console.log('Mongo Connected')
@@ -44,6 +45,7 @@ app.use(express.urlencoded({ extended: true })) // for parsing application/x-www
 app.use(express.json())
 app.use(cors(corsOptions))
 app.use(session({ secret: 'thisisasecret', resave: false }))
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -57,7 +59,7 @@ app.use('/state', state)
 app.use('/district', district)
 app.use('/auth', auth)
 
-app.get('/', catchAsync(async (req, res, next) => {
+app.get('/', isLoggedIn, catchAsync(async (req, res, next) => {
     const surveyor = await Surveyor.find({ username: 'vishu ji' })
     if (!surveyor) {
         return next(new AppError('Data does not exist', 204))

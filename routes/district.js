@@ -6,7 +6,7 @@ const State = require('../models/state')
 const AppError = require('../utils/AppError')
 const catchAsync = require('../utils/catchAsync')
 
-router.get('/', catchAsync(async (req, res, next) => {
+router.get('/', isLoggedIn, catchAsync(async (req, res, next) => {
     const districts = await District.find({}).populate({
         path: "state",
         select: "name"
@@ -27,8 +27,6 @@ router.post('/', catchAsync(async (req, res, next) => {
     district.state = stateFound[0]._id
     await district.save();
     res.send('District Added')
-
-
 }))
 
 

@@ -4,19 +4,26 @@ const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/AppError')
 const passport = require('passport')
 const Surveyor = require('../models/surveyor')
+const jwt = require('jsonwebtoken');
 
-router.post('/register', async (req, res) => {
+router.post('/register', catchAsync(async (req, res) => {
     const { email, username, password, name, designation, organization } = req.body;
     const s = new Surveyor({ email, username, name, designation, organization })
     const newSurveyor = await Surveyor.register(s, password)
-    res.send(newSurveyor)
-})
+    return res.send(newSurveyor)
+}))
 
 
-router.post('/login', passport.authenticate('local'), async (req, res, next) => {
-    res.send('Logged In')
+
+
+router.post('/login', catchAsync(async (req, res, next) => {
+    jwt.sign(req.body, 'privatekey', { expiresIn: '1h' }, (err, token) => {
+        if (err) { console.log(err) }
+        res.send(token);
+
+    });
     // res.redirect('http://localhost:3000/')
-})
+}))
 
 
 
